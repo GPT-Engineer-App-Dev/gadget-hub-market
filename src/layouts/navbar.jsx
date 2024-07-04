@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,22 +13,47 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { CircleUser, Menu, Package2 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "@/lib/api"; // Assuming you have an API utility to fetch products
 import { navItems } from "../App";
 
 const Layout = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  const filteredProducts = products?.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 justify-between">
         <DesktopNav />
         <MobileNav />
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         <UserMenu />
       </header>
       <main className="flex-grow p-4 overflow-auto">
-        <Outlet />
+        <Outlet context={{ filteredProducts }} />
       </main>
     </div>
   );
 };
+
+const SearchBar = ({ searchTerm, setSearchTerm }) => (
+  <div className="flex items-center">
+    <Input
+      type="text"
+      placeholder="Search products..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full max-w-xs"
+    />
+  </div>
+);
 
 const DesktopNav = () => (
   <nav className="hidden md:flex md:items-center md:gap-5 lg:gap-6 text-lg font-medium md:text-sm">

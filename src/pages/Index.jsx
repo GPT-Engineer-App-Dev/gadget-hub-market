@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 
 const fetchFeaturedProducts = async () => {
   // Simulate fetching data from an API
@@ -13,6 +13,7 @@ const fetchFeaturedProducts = async () => {
 };
 
 const Index = () => {
+  const { filteredProducts } = useOutletContext();
   const { data: products, isLoading, error } = useQuery({
     queryKey: ["featuredProducts"],
     queryFn: fetchFeaturedProducts,
@@ -20,6 +21,8 @@ const Index = () => {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading products</div>;
+
+  const displayProducts = filteredProducts || products;
 
   return (
     <div className="space-y-8">
@@ -34,7 +37,7 @@ const Index = () => {
       <section>
         <h2 className="text-2xl font-semibold mb-4">Featured Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {products.map((product) => (
+          {displayProducts.map((product) => (
             <Card key={product.id}>
               <img src={product.image} alt={product.name} className="mx-auto object-cover w-full h-[200px]" />
               <CardHeader>
